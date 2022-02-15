@@ -393,9 +393,10 @@
         if (resultEntry.error === 0) {
           infoStr += " (exact match)";
         } else if (resultEntry.error < 0.01) {
-          infoStr += " (error: " + (resultEntry.error * 10000).toFixed(1) + " ppm)";
+          alert(resultEntry.error)
+          infoStr += " (error: " + (resultEntry.error * 1000000).toFixed(1) + " ppm)";
         } else {
-          infoStr += " (error: " + resultEntry.error.toFixed(2) + "%)";
+          infoStr += " (error: " + (resultEntry.error * 100).toFixed(2) + "%)";
         }
         $("#" + divId + "-info").text(infoStr);
       }
