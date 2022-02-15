@@ -332,7 +332,7 @@
         let results = findSubstitutesRLC(Resistor, desiredValue, values, errorTolerance, depth);
 
         if (results.length === 0) {
-          showError("No solution found. Try increasing your error tolerance.");
+          showError(`No solution found with ${depth} components. Try increasing your error tolerance or using a smaller value series.`);
           return;
         }
 
