@@ -55,16 +55,32 @@ function computeAbsError(expected, got) {
 }
 
 function isMoreOrLessAnInteger(num) {
-  if (Number.isInteger(num))
-    return true;
+  if (Number.isInteger(num)) return true;
 
-  if (num % 1 < 0.0000000001)
-    return true;
+  if (num % 1 < 0.0000000001) return true;
 
   return false;
 }
 
-function toStringWithSuffix(num) {
+function numRoundToBestOf(num, maxDecimalPlaces) {
+  console.assert(!Number.isNaN(num));
+  console.assert(!Number.isNaN(maxDecimalPlaces));
+
+  if (isMoreOrLessAnInteger(num)) {
+    return num.toFixed(0);
+  }
+
+  let i = 0;
+  for (; i < maxDecimalPlaces; i++) {
+    if (Number.parseFloat(num.toFixed(i)) === Number.parseFloat(num.toFixed(i + 1))) {
+      break;
+    }
+  }
+
+  return num.toFixed(i);
+}
+
+function toStringWithSuffix(num, maxDecimalPlaces = 16) {
   console.assert(!Number.isNaN(num));
 
   const suffixTable = new Map([
@@ -100,18 +116,10 @@ function toStringWithSuffix(num) {
   }
 
   if (suffixTable.has(count.toString())) {
-    if (isMoreOrLessAnInteger(num)) {
-      return num.toFixed(0) + suffixTable.get(count.toString());
-    }
-
-    return num.toFixed(1) + suffixTable.get(count.toString());
+    return numRoundToBestOf(num, maxDecimalPlaces) + suffixTable.get(count.toString());
   }
 
-  if (isMoreOrLessAnInteger(origNum)) {
-    return origNum.toFixed(0);
-  }
-
-  return origNum.toFixed(2);
+  return numRoundToBestOf(origNum, maxDecimalPlaces);
 }
 
 function fromStringWithSuffix(strNum) {
@@ -119,7 +127,6 @@ function fromStringWithSuffix(strNum) {
 
   let num = Number.parseFloat(strNum);
 
-  
   const suffixTable = new Map([
     ["M", Math.pow(10, 6)],
     ["k", Math.pow(10, 3)],
@@ -132,8 +139,7 @@ function fromStringWithSuffix(strNum) {
   let lastChar = strNum[strNum.length - 1];
   let allButLastChar = strNum.substring(0, strNum.length - 1);
 
-  if (!Number.isNaN(Number.parseInt(lastChar)))
-    return Number.parseFloat(strNum);
+  if (!Number.isNaN(Number.parseInt(lastChar))) return Number.parseFloat(strNum);
 
   console.assert(suffixTable.has(lastChar));
   return Number.parseFloat(allButLastChar) * suffixTable.get(lastChar);
