@@ -384,7 +384,7 @@
         if (resultEntry.error === 0) {
           infoStr += " (exact match)";
         } else if (resultEntry.error < 0.01) {
-          infoStr += " (error: " + (resultEntry.error * 10000).toFixed(2) + " ppm)";
+          infoStr += " (error: " + (resultEntry.error * 10000).toFixed(1) + " ppm)";
         } else {
           infoStr += " (error: " + resultEntry.error.toFixed(2) + "%)";
         }
