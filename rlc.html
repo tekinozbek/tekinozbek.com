@@ -393,7 +393,6 @@
         if (resultEntry.error === 0) {
           infoStr += " (exact match)";
         } else if (resultEntry.error < 0.01) {
-          alert(resultEntry.error)
           infoStr += " (error: " + (resultEntry.error * 1000000).toFixed(1) + " ppm)";
         } else {
           infoStr += " (error: " + (resultEntry.error * 100).toFixed(2) + "%)";
