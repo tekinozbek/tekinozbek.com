@@ -54,23 +54,6 @@ function computeAbsError(expected, got) {
   return Math.abs(1 - got / expected);
 }
 
-Array.prototype.min = function (func) {
-  return this.reduce(function (min, value) {
-    console.assert(!Number.isNaN(value));
-
-    let funcResult = func(value);
-
-    if ((min != null && funcResult < min.funcResult) || min == null) {
-      return {
-        funcResult: funcResult,
-        element: value,
-      };
-    }
-
-    return min;
-  }, null);
-};
-
 function isMoreOrLessAnInteger(num) {
   if (Number.isInteger(num))
     return true;
@@ -128,7 +111,7 @@ function toStringWithSuffix(num) {
     return origNum.toFixed(0);
   }
 
-  return origNum.toString();
+  return origNum.toFixed(2);
 }
 
 function fromStringWithSuffix(strNum) {
