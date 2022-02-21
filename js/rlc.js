@@ -116,7 +116,7 @@ class Resistor {
 
     let h = 5;
     let w = 5;
-    let end = w * 9;
+    let end = w * 8;
 
     for (let x = w / 2; x < end; x += w) {
       h = h * -1;

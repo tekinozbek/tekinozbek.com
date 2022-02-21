@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="title" content="tekinozbek.com" />
+    <meta name="title" content="Resistor Substitution Calculator" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="author" content="Tekin Ozbek" />
@@ -46,7 +46,7 @@
         </p>
 
         <div class="row">
-          <div class="col-xxl-4">
+          <div class="col-xl-4">
             <form action="javascript:calculate();">
               <div class="input-group mb-3">
                 <span class="input-group-text">Desired value</span>
@@ -110,7 +110,7 @@
       </div>
     </main>
 
-    <footer class="footer mt-auto" id="footer"></footer>
+    <footer class="footer mt-auto py-3 bg-dark" id="footer"></footer>
 
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -272,8 +272,8 @@
         $("#fewest-components").addClass("d-none");
 
         let desiredValue = fromStringWithSuffix($("#desired-value").val());
-        if (Number.isNaN(desiredValue)) {
-          showError("Desired value must be a number.");
+        if (Number.isNaN(desiredValue) || desiredValue < 0) {
+          showError("Desired value must be a positive number.");
           return;
         }
 
@@ -282,7 +282,7 @@
           showError("Error tolerance must be a number.");
           return;
         }
-        errorTolerance /= 100;
+        errorTolerance = Math.abs(errorTolerance) / 100;
 
         let series = $("#series-selector").find(":selected").val();
         let values = [];
@@ -293,7 +293,9 @@
             .forEach(function (line) {
               line.split(",").forEach(function (value) {
                 let x = fromStringWithSuffix(value.trim());
-                if (Number.isNaN(x)) {
+                if (value.trim() === "") {
+                  return;
+                } else if (Number.isNaN(x) || x < 0) {
                   showError("Invalid value: " + value);
                   return;
                 }
@@ -320,7 +322,9 @@
         let depth = 0;
 
         for (; ; depth += 1) {
-          if (Math.pow(values.length + 1 / (depth - 1), depth - 1) > 20000) break;
+          if (Math.pow(values.length + 1 / (depth - 1), depth - 1) > 20000) {
+            break;
+          }
         }
 
         depth = Math.min(10, depth - 1);

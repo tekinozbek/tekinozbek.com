@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="title" content="Capacitor Charge & Discharge Calculator" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="author" content="Tekin Ozbek" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+
+    <title>Capacitor Charge & Discharge Graph | tekinozbek.com</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <header>
+      <div class="container-fluid pb-1 pt-3" style="background-color: lightgray">
+        <div class="container">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+              <li class="breadcrumb-item active">Capacitor Charge & Discharge Graph</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container-md">
+        <h1 class="mt-3">Capacitor Charge & Discharge Graph</h1>
+        <p class="lead">
+          The graph shows charge voltage and current (green solid and dashed lines, respectively) and discharge voltage and current
+          (red solid and dashed lines, respectively).
+        </p>
+
+        <div class="row">
+          <div class="col-xl-4">
+            <form action="javascript:showGraph();">
+              <div class="input-group mb-3">
+                <span class="input-group-text">Capacitance</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="capacitance-value"
+                  autocomplete="off"
+                  value="100u"
+                  required
+                />
+                <span class="input-group-text">F</span>
+              </div>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text">Resistance</span>
+                <input type="text" class="form-control" id="resistance-value" autocomplete="off" value="10" required />
+                <span class="input-group-text">Ω</span>
+              </div>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text">Voltage</span>
+                <input type="text" class="form-control" id="voltage-value" autocomplete="off" value="1" />
+                <span class="input-group-text">V</span>
+              </div>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text">Time constant</span>
+                <input type="text" class="form-control" id="time-constant-value" autocomplete="off" value="" readonly />
+                <span class="input-group-text">s</span>
+              </div>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text">Energy stored</span>
+                <input type="text" class="form-control" id="energy-value" autocomplete="off" value="" readonly />
+                <span class="input-group-text">J</span>
+              </div>
+
+              <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Graph</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="col">
+            <div id="desmos" class="d-none" style="width: 100%; height: 400px"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-dark" id="footer"></footer>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/rlc.js"></script>
+    <script type="text/javascript" src="js/html.js"></script>
+
+    <script type="text/javascript">
+      var observersInitialized = false;
+
+      function showGraph() {
+        $("#time-constant-value").val("");
+        $("#desmos").addClass("d-none");
+
+        let capacitance = fromStringWithSuffix($("#capacitance-value").val());
+        if (Number.isNaN(capacitance) || capacitance <= 0) {
+          alert("Capacitance must be a positive number.");
+          return;
+        }
+
+        let resistance = fromStringWithSuffix($("#resistance-value").val());
+        if (Number.isNaN(resistance) || resistance <= 0) {
+          alert("Resistance must be a positive number.");
+          return;
+        }
+
+        let voltage = fromStringWithSuffix($("#voltage-value").val());
+        if (Number.isNaN(voltage) || voltage === 0) {
+          $("#voltage-value").val(1);
+          voltage = 1;
+        }
+
+        $("#time-constant-value").val(toStringWithSuffix(resistance * capacitance));
+        $("#energy-value").val(toStringWithSuffix(0.5 * capacitance * Math.pow(voltage, 2)));
+
+        // Prep the graph if voltage is available and then show it
+        graph.setExpressions([
+          {
+            id: "resistance",
+            latex: "R=" + resistance,
+            sliderBounds: {
+              min: 0,
+              max: resistance + Math.abs(resistance * 2),
+              step: 0.01 * resistance,
+            },
+          },
+          {
+            id: "capacitance",
+            latex: "C=" + capacitance,
+            sliderBounds: {
+              min: 0,
+              max: capacitance + Math.abs(capacitance * 2),
+              step: 0.01 * capacitance,
+            },
+          },
+          {
+            id: "voltage",
+            latex: "V=" + voltage,
+            sliderBounds: {
+              min: voltage - Math.abs(voltage * 2),
+              max: voltage + Math.abs(voltage * 2),
+              step: 0.01 * voltage,
+            },
+          },
+          {
+            id: "vcharge",
+            latex: "V_{charge}(x)=V \\cdot (1-e^{-\\frac{X(x)}{RC}})",
+            color: Desmos.Colors.GREEN,
+            lineWidth: 2,
+            lineOpacity: 1,
+          },
+          {
+            id: "vdischarge",
+            latex: "V_{discharge}(x)=V \\cdot e^{-\\frac{X(x)}{RC}}",
+            color: Desmos.Colors.RED,
+            lineWidth: 2,
+            lineOpacity: 1,
+          },
+          {
+            id: "icharge",
+            latex: "I_{charge}(x)=\\frac{V - V_{charge}(x)}{R}",
+            color: Desmos.Colors.GREEN,
+            lineStyle: Desmos.Styles.DASHED,
+            lineWidth: 1,
+            lineOpacity: 0.75,
+          },
+          {
+            id: "idischarge",
+            latex: "I_{discharge}(x)=-\\frac{V_{discharge}(x)}{R}",
+            color: Desmos.Colors.RED,
+            lineStyle: Desmos.Styles.DASHED,
+            lineWidth: 1,
+            lineOpacity: 0.75,
+          },
+          {
+            id: "fix",
+            latex: "X(x)=x \\{ x \\geq 0 \\}",
+            secret: true,
+          },
+        ]);
+
+        if (!observersInitialized) {
+          let r = graph.HelperExpression({ latex: "R" });
+          r.observe("numericValue", function () {
+            $("#resistance-value").val(toStringWithSuffix(r.numericValue));
+            $("#time-constant-value").val(toStringWithSuffix(r.numericValue * c.numericValue));
+          });
+
+          let c = graph.HelperExpression({ latex: "C" });
+          c.observe("numericValue", function () {
+            $("#capacitance-value").val(toStringWithSuffix(c.numericValue));
+            $("#time-constant-value").val(toStringWithSuffix(r.numericValue * c.numericValue));
+            $("#energy-value").val(toStringWithSuffix(0.5 * c.numericValue * Math.pow(v.numericValue, 2)));
+          });
+
+          let v = graph.HelperExpression({ latex: "V" });
+          v.observe("numericValue", function () {
+            $("#voltage-value").val(toStringWithSuffix(v.numericValue));
+            $("#energy-value").val(toStringWithSuffix(0.5 * c.numericValue * Math.pow(v.numericValue, 2)));
+          });
+
+          observersInitialized = true;
+        }
+
+        // Add vertical lines for each RC step
+        for (let i = 1; i <= 5; i++) {
+          graph.setExpression({
+            id: "rc" + i,
+            latex: "x=RC*" + i.toFixed(0),
+            color: Desmos.Colors.BLACK,
+            lineStyle: Desmos.Styles.DOTTED,
+            lineWidth: 1,
+            lineOpacity: 0.5,
+            secret: true,
+          });
+        }
+
+        // Set the viewport bounds
+        if (voltage > 0) {
+          graph.setMathBounds({
+            left: -(0.1 * resistance * capacitance),
+            right: 5 * (resistance * capacitance),
+            bottom: -voltage / resistance,
+            top: voltage,
+          });
+        } else {
+          graph.setMathBounds({
+            left: -(0.1 * resistance * capacitance),
+            right: 5 * (resistance * capacitance),
+            bottom: voltage,
+            top: voltage / resistance,
+          });
+        }
+
+        $("#desmos").removeClass("d-none");
+
+        var newDefaultState = graph.getState();
+        graph.setDefaultState(newDefaultState);
+      }
+
+      $(document).ready(function () {
+        graph = Desmos.GraphingCalculator($("#desmos")[0], {
+          fontSize: 12,
+          expressionsCollapsed: true,
+          settingsMenu: false,
+          keypad: false,
+          showGrid: false,
+          xAxisLabel: "time",
+          yAxisLabel: "voltage (current)",
+        });
+      });
+    </script>
+  </body>
+</html>

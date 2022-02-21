@@ -83,6 +83,9 @@ function numRoundToBestOf(num, maxDecimalPlaces) {
 function toStringWithSuffix(num, maxDecimalPlaces = 16) {
   console.assert(!Number.isNaN(num));
 
+  if (num === 0)
+    return num.toFixed(0);
+
   const suffixTable = new Map([
     ["-6", "M"],
     ["-3", "k"],
