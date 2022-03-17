@@ -57,7 +57,7 @@ function computeAbsError(expected, got) {
 function isMoreOrLessAnInteger(num) {
   if (Number.isInteger(num)) return true;
 
-  if (num % 1 < 0.0000000001) return true;
+  if (num % 1 < 0.0000000000001) return true;
 
   return false;
 }
@@ -104,12 +104,12 @@ function toStringWithSuffix(num, maxDecimalPlaces = 16) {
     num *= -1;
   }
 
-  while (num >= Math.pow(10, 3)) {
+  while (num >= Math.pow(10, 3) && count > -6) {
     num *= Math.pow(10, -3);
     count -= 3;
   }
 
-  while (num < 1) {
+  while (num < 1 && count < 12) {
     num *= Math.pow(10, 3);
     count += 3;
   }
@@ -119,7 +119,7 @@ function toStringWithSuffix(num, maxDecimalPlaces = 16) {
   }
 
   if (suffixTable.has(count.toString())) {
-    return numRoundToBestOf(num, maxDecimalPlaces) + suffixTable.get(count.toString());
+    return numRoundToBestOf(num, maxDecimalPlaces) + suffixTable.get(count.toFixed(0));
   }
 
   return numRoundToBestOf(origNum, maxDecimalPlaces);

@@ -191,7 +191,7 @@
 
           // Draw the value string
           ctx.font = "12px sans-serif";
-          let valueString = toStringWithSuffix(component.getSelfValue(), 2) + component.getUnit();
+          let valueString = toStringWithSuffix(component.getSelfValue()) + component.getUnit();
           let metrics = ctx.measureText(valueString);
 
           let textX = (width - metrics.width - parallelPadding * 2) / 2;
@@ -392,7 +392,7 @@
         adjustCanvasSize(canvas, $canvas.parent().width(), size.h);
         drawComponent(canvas, resultEntry.substitute);
 
-        let infoStr = toStringWithSuffix(resultEntry.substitute.getValue(), 2) + resultEntry.substitute.getUnit();
+        let infoStr = toStringWithSuffix(resultEntry.substitute.getValue()) + resultEntry.substitute.getUnit();
         if (resultEntry.error === 0) {
           infoStr += " (exact match)";
         } else if (resultEntry.error < 0.01) {

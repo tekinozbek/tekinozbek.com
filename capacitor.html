@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="title" content="Capacitor Charge & Discharge Calculator" />
+    <meta name="title" content="Capacitor Charge & Discharge Graph" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="author" content="Tekin Ozbek" />
@@ -34,8 +34,8 @@
       <div class="container-md">
         <h1 class="mt-3">Capacitor Charge & Discharge Graph</h1>
         <p class="lead">
-          The graph shows charge voltage and current (green solid and dashed lines, respectively) and discharge voltage and current
-          (red solid and dashed lines, respectively).
+          The graph shows charge voltage and current (green solid and dashed lines, respectively) and discharge voltage
+          and current (red solid and dashed lines, respectively).
         </p>
 
         <div class="row">
@@ -138,6 +138,16 @@
 
         $("#time-constant-value").val(toStringWithSuffix(resistance * capacitance));
         $("#energy-value").val(toStringWithSuffix(0.5 * capacitance * Math.pow(voltage, 2)));
+
+        // If the capacitor (or resistance, or voltage really) is too small, Desmos will
+        // start behaving wonky.
+        if (
+          capacitance < fromStringWithSuffix("1u") ||
+          resistance < fromStringWithSuffix("1u") ||
+          voltage < fromStringWithSuffix("1u")
+        ) {
+          return;
+        }
 
         // Prep the graph if voltage is available and then show it
         graph.setExpressions([
